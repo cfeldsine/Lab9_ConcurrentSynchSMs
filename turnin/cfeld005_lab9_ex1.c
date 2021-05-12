@@ -71,37 +71,22 @@ int main(void) {
     /* Insert DDR and PORT initializations */
     DDRB = 0xFF; PORTB = 0x00;
 
-    TimerSet(1);
+    TimerSet(1000);
     TimerOn();
 
     tmpB = 0x00;
 
     SM1_State = l1;
-    SM2_State = on;
-
-    unsigned short c1 = 300;
-    unsigned short c2 = 1000;
 
     while (1) {
-      if (c1 == 300){
         TickFCT_ThreeLEDsSM();
-        c1 = 0;
-      }
-      if (c2 == 1000){
         TickFCT_BlinkingLEDSM();
-        c2 = 0;
-      }
+        TickFCT_CombineLEDsSM();
 
+        PORTB = tmpB;
 
-      TickFCT_CombineLEDsSM();
-
-      c1++;
-      c2++;
-
-      PORTB = tmpB;
-
-      while(!TimerFlag);
-      TimerFlag=0;
+        while(!TimerFlag);
+        TimerFlag=0;
 
     }
     return 1;

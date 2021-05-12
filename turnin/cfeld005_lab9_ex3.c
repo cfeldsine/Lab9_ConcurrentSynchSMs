@@ -15,7 +15,7 @@
 
 
 enum SM1_States {l1, l2, l3} SM1_State;
-enum SM2_States {on, off} SM2_State;
+enum SM2_States {on, off} SM2_State, SM3_State;
 
 unsigned char tmpB;
 
@@ -44,6 +44,21 @@ void TickFCT_BlinkingLEDSM(){
   }
 }
 
+void TickFCT_Sound(unsigned char tmpA){
+  switch (SM3_State) {
+    case on:
+      if (tmpA & 0x04){
+        SM3_State = off;
+      }
+      break;
+    case off:
+      if (tmpA & 0x04){
+        SM3_State = on;
+      }
+      break;
+  }
+}
+
 void TickFCT_CombineLEDsSM(){
   tmpB = 0x00;
   switch (SM1_State) {
@@ -65,10 +80,19 @@ void TickFCT_CombineLEDsSM(){
     case off:
       break;
   }
+
+  switch(SM3_State) {
+    case on:
+      tmpB = tmpB | 0x10;
+      break;
+    case off:
+      break;
+  }
 }
 
 int main(void) {
     /* Insert DDR and PORT initializations */
+    DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
 
     TimerSet(1);
@@ -77,12 +101,16 @@ int main(void) {
     tmpB = 0x00;
 
     SM1_State = l1;
-    SM2_State = on;
 
     unsigned short c1 = 300;
     unsigned short c2 = 1000;
+    unsigned short c3 = 2;
+
+    unsigned char tmpA = 0x00;
 
     while (1) {
+      tmpA = ~PINA;
+
       if (c1 == 300){
         TickFCT_ThreeLEDsSM();
         c1 = 0;
@@ -91,6 +119,13 @@ int main(void) {
         TickFCT_BlinkingLEDSM();
         c2 = 0;
       }
+
+
+      if (c3 == 2){
+        TickFCT_Sound(tmpA);
+        c3 = 0;
+      }
+      c3++;
 
 
       TickFCT_CombineLEDsSM();
